@@ -1,200 +1,169 @@
 ﻿namespace LinearEquationSolver
 {
     using System;
-    using System.Runtime.CompilerServices;
+    using System.Diagnostics;
 
-    public class Fraction : IComparable<Fraction>
+    public struct Fraction : IComparable<Fraction>
     {
         public static readonly Fraction Zero = new Fraction(0, 0);
         public static readonly Fraction One = new Fraction(1, 1);
 
-        public static Fraction Simplify(Fraction _frac)
+        public static Fraction Add(Fraction lhs, Fraction rhs)
         {
-            // Handle zero cases:
-            if (_frac.Numberator == 0) return new Fraction(Fraction.Zero);
-            
-            var ret = new Fraction(_frac);
-            long gcd = GCD.Calc(ret.Numberator, ret.Denominator);
-            ret.Numberator /= gcd;
-            ret.Denominator /= gcd;
+            // Additions with 0 are special:
+            if (lhs.denominator == 0) return new Fraction(rhs);
+            if (rhs.denominator == 0) return new Fraction(lhs);
 
-            // Handle both negatative case:
-            if (ret.numberator < 0 && ret.denominator < 0)
-            {
-                ret.numberator = -ret.numberator;
-                ret.denominator = -ret.denominator;
-            }
-
+            long numberator = lhs.numberator * rhs.denominator + rhs.numberator * lhs.denominator;
+            long denominator = lhs.denominator * rhs.denominator;
+            var ret = new Fraction(numberator, denominator);
             return ret;
         }
 
-        public static Fraction Add(Fraction _f1, Fraction _f2)
+        public static Fraction Sub(Fraction lhs, Fraction rhs)
         {
-            // Handle zero cases:
-            if (_f1.Denominator == 0) return _f2;
-            if (_f2.Denominator == 0) return _f1;
-
-            var ret = new Fraction(_f1);
-            ret.Numberator = ret.Numberator * _f2.Denominator + ret.Denominator * _f2.Numberator;
-            ret.Denominator = ret.Denominator * _f2.Denominator;
-            return Fraction.Simplify(ret);
+            return Fraction.Add(lhs, -rhs);
         }
 
-        public static Fraction Sub(Fraction _f1, Fraction _f2)
+        public static Fraction Mult(Fraction lhs, Fraction rhs)
         {
-            // Handle zero cases:
-            if (_f1.Denominator == 0) return -_f2;
-            if (_f2.Denominator == 0) return _f1;
-
-            var ret = new Fraction(_f1);
-            ret.Numberator = ret.Numberator * _f2.Denominator - ret.Denominator * _f2.Numberator;
-            ret.Denominator = ret.Denominator * _f2.Denominator;
-            return Fraction.Simplify(ret);
-        }
-
-        public static Fraction Mult(Fraction _f1, Fraction _f2)
-        {
-            var ret = new Fraction(_f1);
-            ret.Numberator *= _f2.Numberator;
-            ret.Denominator *= _f2.Denominator;
+            long numberator = lhs.numberator * rhs.numberator;
+            long denominator = lhs.denominator * rhs.denominator;
+            var ret = new Fraction(numberator, denominator);
             return ret;
         }
 
-        public static Fraction Div(Fraction _f1, Fraction _f2)
+        public static Fraction Div(Fraction lhs, Fraction rhs)
         {
-            var ret = new Fraction(_f1);
-            ret.Denominator *= _f2.Numberator;
-            ret.Numberator *= _f2.Denominator;
+            long numberator = lhs.numberator * rhs.denominator;
+            long denominator = lhs.denominator * rhs.numberator;
+            var ret = new Fraction(numberator, denominator);
             return ret;
         }
 
         private long numberator;
         private long denominator;
 
-        public long Numberator
+        public long Numberator => this.numberator;
+        public long Denominator => this.denominator;
+
+        public Fraction(long numberator, long denominator)
         {
-            get { return this.numberator; }
-            set
-            {
-                this.CheckValid(value, this.denominator);
-                this.numberator = value;
-                this.FixSigns();
-                this.FixZeroNumberator();
-            }
+            this.numberator = numberator;
+            this.denominator = denominator;
+            this.Simplify();
+        }
+        public Fraction(Fraction f)
+        {
+            this.numberator = f.numberator;
+            this.denominator = f.denominator;
+            // No need to simplify on copy.
         }
 
-        public long Denominator
+        public static explicit operator Fraction(sbyte x) => new Fraction(x, 1);
+        public static explicit operator Fraction(byte x) => new Fraction(x, 1);
+        public static explicit operator Fraction(short x) => new Fraction(x, 1);
+        public static explicit operator Fraction(int x) => new Fraction(x, 1);
+        public static explicit operator Fraction(long x) => new Fraction(x, 1);
+        public static explicit operator Fraction(ushort x) => new Fraction(x, 1);
+        public static explicit operator Fraction(uint x) => new Fraction(x, 1);
+        // public static explicit operator Fraction(ulong x) => new Fraction(x, 1); Note that this can overflow the numberator
+
+        public Fraction Add(Fraction other) => Fraction.Add(this, other);
+        public static Fraction operator +(Fraction x) => new Fraction(x.numberator, x.denominator);
+        public static Fraction operator +(Fraction a, Fraction b) => a.Add(b);
+        public Fraction Sub(Fraction other) => Fraction.Sub(this, other);
+        public static Fraction operator -(Fraction x) => new Fraction(-x.numberator, x.denominator);
+        public static Fraction operator -(Fraction a, Fraction b) => a.Sub(b);
+        public Fraction Mult(Fraction other) => Fraction.Mult(this, other);
+        public static Fraction operator *(Fraction a, Fraction b) => a.Mult(b);
+        public Fraction Div(Fraction other) => Fraction.Div(this, other);
+        public static Fraction operator /(Fraction a, Fraction b) => a.Div(b);
+
+        public override bool Equals(object obj)
         {
-            get { return this.denominator; }
-            set
+            if (obj is Fraction)
             {
-                this.CheckValid(this.numberator, value);
-                this.denominator = value;
-                this.FixSigns();
-                this.FixZeroNumberator();
-            }
-        }
-
-        public Fraction() : this(0, 0) { }
-        public Fraction(Fraction _f) : this(_f.Numberator, _f.Denominator) { }
-        public Fraction(long _numberator, long _denominator)
-        {
-            this.CheckValid(_numberator, _denominator);
-            this.numberator = _numberator;
-            this.denominator = _denominator;
-            this.FixSigns();
-            this.FixZeroNumberator();
-        }
-
-        public static explicit operator Fraction(sbyte _a) => new Fraction(_a, 1);
-        public static explicit operator Fraction(byte _a) => new Fraction(_a, 1);
-        public static explicit operator Fraction(short _a) => new Fraction(_a, 1);
-        public static explicit operator Fraction(int _a) => new Fraction(_a, 1);
-        public static explicit operator Fraction(long _a) => new Fraction(_a, 1);
-        public static explicit operator Fraction(ushort _a) => new Fraction(_a, 1);
-        public static explicit operator Fraction(uint _a) => new Fraction(_a, 1);
-        //public static explicit operator Fraction(ulong _a) => new Fraction(_a, 1); Note that this can overflow the numberator
-
-        public Fraction Add(Fraction _other) => Fraction.Add(this, _other);
-
-        public static Fraction operator +(Fraction _a) => new Fraction(_a.Numberator, _a.Denominator);
-
-        public static Fraction operator +(Fraction _a, Fraction _b) => _a.Add(_b);
-
-        public Fraction Sub(Fraction _other) => Fraction.Sub(this, _other);
-
-        public static Fraction operator -(Fraction _a) => new Fraction(-_a.Numberator, _a.Denominator);
-
-        public static Fraction operator -(Fraction _a, Fraction _b) => _a.Sub(_b);
-
-        public Fraction Mult(Fraction _other) => Fraction.Mult(this, _other);
-
-        public static Fraction operator *(Fraction _a, Fraction _b) => _a.Mult(_b);
-
-        public Fraction Div(Fraction _other) => Fraction.Div(this, _other);
-
-        public static Fraction operator /(Fraction _a, Fraction _b) => _a.Div(_b);
-
-        public override bool Equals(object _obj)
-        {
-            if (_obj is Fraction)
-            {
-                var other = Fraction.Simplify((Fraction)_obj);
-                var simpleThis = Fraction.Simplify(this);
-                return (other.Denominator == simpleThis.Denominator && other.Numberator == simpleThis.Numberator);
+                var objFrac = (Fraction)(obj);
+                return (this.denominator == objFrac.denominator && this.numberator == objFrac.numberator);
             }
             return false;
         }
 
-        public static bool operator ==(Fraction _a, Fraction _b) => _a.Equals(_b);
-
-        public static bool operator !=(Fraction _a, Fraction _b) => !_a.Equals(_b);
+        public static bool operator ==(Fraction a, Fraction b) => a.Equals(b);
+        public static bool operator !=(Fraction a, Fraction b) => !a.Equals(b);
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Numberator, Denominator);
+            return HashCode.Combine(this.numberator, this.denominator);
         }
 
-        public override string ToString()
+        public int CompareTo(Fraction other)
         {
-            return string.Format("{0}/{1}", this.Numberator, this.Denominator);
-        }
-
-        public int CompareTo(Fraction _other)
-        {
-            long lcm = LCM.Calculate(_other.Denominator, this.Denominator);
-            long diff = this.Numberator * (lcm / this.Denominator) - _other.Numberator * (lcm / _other.Denominator);
+            long lcm = LCM.Calculate(other.numberator, this.denominator);
+            long diff = this.numberator * (lcm / this.denominator) - other.numberator * (lcm / other.denominator);
             if (diff > 0) return 1;
             if (diff < 0) return -1;
             else return 0;
         }
 
-        public static bool operator >(Fraction _a, Fraction _b) => _a.CompareTo(_b) > 0;
+        public static bool operator >(Fraction a, Fraction b) => a.CompareTo(b) > 0;
+        public static bool operator >=(Fraction a, Fraction b) => a.CompareTo(b) >= 0;
+        public static bool operator <(Fraction a, Fraction b) => a.CompareTo(b) < 0;
+        public static bool operator <=(Fraction a, Fraction b) => a.CompareTo(b) <= 0;
 
-        public static bool operator >=(Fraction _a, Fraction _b) => _a.CompareTo(_b) >= 0;
-
-        public static bool operator <(Fraction _a, Fraction _b) => _a.CompareTo(_b) < 0;
-
-        public static bool operator <=(Fraction _a, Fraction _b) => _a.CompareTo(_b) <= 0;
-
-        private void CheckValid(long _numberator, long _denominator)
+        public override string ToString()
         {
-            if (_numberator != 0 && _denominator == 0) throw new InvalidOperationException("Trying to divide by zero");
+            // TODO: fix this nonsense:
+            if (this.numberator == 0) return "0";
+            if (this.denominator == 1) return this.numberator.ToString();
+            return string.Format("{0}/{1}", this.numberator, this.denominator);
         }
 
-        private void FixSigns()
+        public bool IsPositive() => this.numberator > 0;
+        public bool IsInteger() => this.denominator == 1;
+
+        private void CheckDivisionByZero()
         {
+            if (this.numberator != 0 && this.denominator == 0)
+            {
+                throw new InvalidOperationException("Divide by zero");
+            }
+        }
+
+        private void Simplify()
+        {
+            this.CheckDivisionByZero();
+
+            // Handle zero case:
+            if (this.numberator == 0)
+            {
+                this = Fraction.Zero;
+                return;
+            }
+
+#if DEBUG
+            // Make sanity check in debug compilation mode - Both these cases should have been handled by this point!
+            Debug.Assert(this.numberator != 0 && this.denominator != 0);
+#endif
+
+            long gcd = GCD.Calc(this.numberator, this.denominator);
+            this.numberator /= gcd;
+            this.denominator /= gcd;
+
+            // Handle equation sign:
             if ((this.numberator < 0 && this.denominator < 0) ||
                 this.numberator > 0 && this.denominator < 0)
             {
                 this.numberator = -this.numberator;
                 this.denominator = -this.denominator;
             }
-        }
-
-        private void FixZeroNumberator()
-        {
-            if (this.numberator == 0 && this.denominator != 0) this.denominator = 0;
+#if DEBUG
+            // Make sanity check in debug compilation mode - Denominator should never be negative!
+            bool validCase1 = this.numberator > 0 && this.denominator > 0;
+            bool validCase2 = this.numberator < 0 && this.denominator > 0;
+            Debug.Assert(validCase1 || validCase2);
+#endif
         }
     }
 }
