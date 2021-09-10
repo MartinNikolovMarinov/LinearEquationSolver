@@ -1,5 +1,6 @@
 ﻿namespace LinearEquationSolver
 {
+    // Greatest Common Divisor
     public static class GCD
     {
         public static long Calc(long a, long b)
