@@ -33,7 +33,7 @@
             };
             var got = l.GetTerms().ToArray();
             string fracAsStr = l.ToString();
-            string expectedFracStr = "-1/2 z + 1/2 y - 2/3 x = -2";
+            string expectedFracStr = "-1/2 z + 1/2 y - 2/3 x = 2";
 
             CollectionAssert.AreEqual(want, got);
             Assert.AreEqual(fracAsStr, expectedFracStr);

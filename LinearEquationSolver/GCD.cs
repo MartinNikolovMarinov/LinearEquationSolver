@@ -16,5 +16,19 @@
 
             return a | b;
         }
+
+        public static long Calc(long[] arr)
+        {
+            if (arr == null || arr.Length == 0) return 0;
+
+            long ret = arr[0];
+            for (int i = 1; i < arr.Length; i++)
+            {
+                ret = GCD.Calc(ret, arr[i]);
+                if (ret == 1) break;
+            }
+
+            return ret;
+        }
     }
 }

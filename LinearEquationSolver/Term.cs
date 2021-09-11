@@ -71,10 +71,12 @@
 
         public override string ToString()
         {
-            if (String.IsNullOrWhiteSpace(this.Variable)) return this.Coefficient.ToString(); // Silly special case.
-            return string.Format("{0} {1}", this.Coefficient, this.Variable);
+            if (String.IsNullOrWhiteSpace(this.Variable)) return this.Coefficient.ToString();
+            if (this.Coefficient == Fraction.One) return this.Variable.ToString();
+            if (this.Coefficient == -Fraction.One) return $"-{this.Variable}";
+            return $"{this.Coefficient} {this.Variable}";
         }
 
-        public bool IsConstant() => this.coefficient.IsInteger() && String.IsNullOrWhiteSpace(this.variable);
+        public bool IsConstant() => String.IsNullOrWhiteSpace(this.variable);
     }
 }

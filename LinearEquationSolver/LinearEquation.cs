@@ -2,6 +2,7 @@
 {
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
     using System.Text;
 
     public class LinearEquation
@@ -16,6 +17,10 @@
                 this.AddTerm(t);
             }
         }
+
+        public IEnumerable<Term> GetTerms() => this.terms;
+        public IEnumerable<long> GetNumberators() => this.terms.Select(x => x.Coefficient.Numberator);
+        public IEnumerable<long> GetDenominators() => this.terms.Select(x => x.Coefficient.Denominator);
 
         public void AddTerm(Term t)
         {
@@ -40,7 +45,38 @@
             }
         }
 
-        public IEnumerable<Term> GetTerms() => this.terms;
+        public void MultEachTermBy(Fraction x)
+        {
+            for (int i = 0; i < this.terms.Count; i++)
+            {
+                var t = this.terms[i];
+                t.Coefficient *= x;
+            }
+        }
+
+        public void DivEachTermBy(Fraction x)
+        {
+            for (int i = 0; i < this.terms.Count; i++)
+            {
+                var t = this.terms[i];
+                t.Coefficient /= x;
+            }
+        }
+
+        public void Simplify()
+        {
+            if (this.terms.Count == 0) return;
+
+            long numberatorGCD = GCD.Calc(this.GetNumberators().ToArray());
+            long denominatorGCD = GCD.Calc(this.GetDenominators().ToArray());
+#if DEBUG
+            // Make sanity check in debug compilation mode - at this point, gcd should never be negative or 0!
+            Debug.Assert(numberatorGCD > 0);
+            Debug.Assert(denominatorGCD > 0);
+#endif
+            if (numberatorGCD > 1) this.DivEachTermBy((Fraction)numberatorGCD);
+            if (denominatorGCD > 1) this.MultEachTermBy((Fraction)denominatorGCD);
+        }
 
         public override string ToString()
         {
@@ -49,7 +85,7 @@
 #endif
 
             StringBuilder sb = new StringBuilder();
-            long constant = 0;
+            Fraction constant = (Fraction)0;
 
             if (this.terms.Count == 0)
             {
@@ -69,7 +105,7 @@
                 if (t.IsConstant())
                 {
                     // found the constant
-                    constant = t.Coefficient.Numberator;
+                    constant = t.Coefficient;
 #if DEBUG
                     // Make sanity check in debug compilation mode - Both these cases should have been handled by this point!
                     Debug.Assert(_dcount == this.terms.Count - 2);
@@ -80,8 +116,7 @@
 
                 if (t.IsPositive())
                 {
-                    sb.Append(" + ");
-                    sb.Append(t.ToString());
+                    sb.Append($" + {t}");
                 }
                 else
                 {
@@ -97,8 +132,8 @@
 #endif
             }
 
-            sb.Append(" = ");
-            sb.Append(constant);
+            // Move the constant to the right hand side:
+            sb.Append($" = {-constant}");
 
             return sb.ToString();
         }

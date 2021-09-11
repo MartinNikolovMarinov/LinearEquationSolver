@@ -100,7 +100,7 @@
 
         public int CompareTo(Fraction other)
         {
-            long lcm = LCM.Calculate(other.numberator, this.denominator);
+            long lcm = LCM.Calc(other.numberator, this.denominator);
             long diff = this.numberator * (lcm / this.denominator) - other.numberator * (lcm / other.denominator);
             if (diff > 0) return 1;
             if (diff < 0) return -1;
@@ -114,7 +114,6 @@
 
         public override string ToString()
         {
-            // TODO: fix this nonsense:
             if (this.numberator == 0) return "0";
             if (this.denominator == 1) return this.numberator.ToString();
             return string.Format("{0}/{1}", this.numberator, this.denominator);
