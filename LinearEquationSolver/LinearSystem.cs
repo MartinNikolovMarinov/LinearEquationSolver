@@ -1,7 +1,8 @@
-﻿namespace LinearEquationSolver
-{
-    using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
+namespace LinearEquationSolver
+{
     public class LinearSystem
     {
         private List<LinearEquation> equations;
@@ -11,6 +12,16 @@
             this.equations = new List<LinearEquation>(eqs);
         }
 
-        // TODO: implement
+        public void AddEquation(LinearEquation eq)
+        {
+            this.equations.Add(eq);
+        }
+
+        public void SolveNextStep()
+        {
+            // ...
+            this.equations.Sort();
+            Console.WriteLine(string.Join("\n", this.equations));
+        }
     }
 }

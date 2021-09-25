@@ -1,6 +1,7 @@
 ﻿namespace Tests
 {
     using LinearEquationSolver;
+    using LinearEquationSolver.Parsers;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using System.Linq;
 
@@ -63,7 +64,7 @@
                 l.AddTerm(new Term(new Fraction(i, 1), emptyStuff[i]));
             }
             CollectionAssert.AreEqual(new Term[] { new Term((Fraction)45, "") }, l.GetTerms().ToArray());
-            Assert.AreEqual("", l.ToString());
+            Assert.AreEqual("45", l.ToString());
         }
 
         [TestMethod]
@@ -80,6 +81,121 @@
 
             CollectionAssert.AreEqual(want, got);
             Assert.AreEqual(fracAsStr, expectedFracStr);
+        }
+
+        [TestMethod]
+        public void ComparingLinearEquations()
+        {
+            ILinearEquationParser ep = new BasicLinearEquation();
+            var testCases = new[] {
+                new
+                {
+                    A = "5y + 3x = 0",
+                    B = "4y + 3x = 0",
+                    Want = 1,
+                    Msg = "Leftmost term is greater in A"
+                },
+                new
+                {
+                    A = "5y + 3x = 0",
+                    B = "6y + 3x = 0",
+                    Want = -1,
+                    Msg = "leftmost term is smaller in A"
+                },
+                new
+                {
+                    A = "2z + 6y + 7y = 12",
+                    B = "2z + 6y + 7y = 12",
+                    Want = 0,
+                    Msg = "A and B are equal"
+                },
+                new
+                {
+                    A = "2z + 6y + 7y = 12",
+                    B = "2z + 6y = 12",
+                    Want = 1,
+                    Msg = "A has more terms then B"
+                },
+                new
+                {
+                    A = "2z + 6y = 12",
+                    B = "2z + 6y + 7y = 12",
+                    Want = -1,
+                    Msg = "B has more terms then A"
+                },
+                new
+                {
+                    A = "2z + 6y + 7x = 12",
+                    B = "2z + 6y + 8s = 3",
+                    Want = 1,
+                    Msg = "B does not have an x term so A is in front"
+                },
+                new
+                {
+                    A = "2z + 6y + 8s = 3",
+                    B = "2z + 6y + 7x = 12",
+                    Want = -1,
+                    Msg = "Same as above but A and B are reversed"
+                },
+                new
+                {
+                    A = "3y - 2y = 12",
+                    B = "y = 12",
+                    Want = 0,
+                    Msg = "Default to comparing coefficients"
+                },
+                new
+                {
+                    A = "2",
+                    B = "y = 12",
+                    Want = -1,
+                    Msg = "A is not an equation, so B should be in front"
+                },
+                new
+                {
+                    A = "3x = 0",
+                    B = "7",
+                    Want = 1,
+                    Msg = "B is not an equation, so A should be in front"
+                },
+                new
+                {
+                    A = "19",
+                    B = "7",
+                    Want = 1,
+                    Msg = "Both are not equations but the constant in A is larger"
+                },
+                new
+                {
+                    A = "",
+                    B = "12",
+                    Want = -1,
+                    Msg = "A is empty"
+                },
+                new
+                {
+                    A = "9",
+                    B = "",
+                    Want = 1,
+                    Msg = "B is empty"
+                },
+                new
+                {
+                    A = "",
+                    B = "",
+                    Want = 0,
+                    Msg = "Both are empty"
+                },
+            };
+
+            foreach (var t in testCases)
+            {
+                // Act
+                LinearEquation a = ep.Parse(t.A);
+                LinearEquation b = ep.Parse(t.B);
+                // Assert:
+                Assert.AreEqual(t.Want, a.CompareTo(b), t.Msg);
+            }
         }
     }
 }

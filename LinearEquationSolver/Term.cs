@@ -1,7 +1,7 @@
-﻿namespace LinearEquationSolver
-{
-    using System;
+﻿using System;
 
+namespace LinearEquationSolver
+{
     public class Term : IComparable<Term>
     {
         private Fraction coefficient;
@@ -33,14 +33,14 @@
             this.Variable = variable;
         }
 
-        public int CompareTo(Term othert)
+        public int CompareTo(Term other)
         {
-            if (this.Variable != othert.Variable)
+            if (this.Variable != other.Variable)
             {
-                return this.Variable.CompareTo(othert.Variable);
+                return this.Variable.CompareTo(other.Variable);
             }
             // If they have equal variables compare the coefficient:
-            return this.Coefficient.CompareTo(othert.Coefficient);
+            return this.Coefficient.CompareTo(other.Coefficient);
         }
 
         public static bool operator >(Term a, Term b) => a.CompareTo(b) > 0;

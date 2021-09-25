@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace LinearEquationSolver
+﻿namespace LinearEquationSolver
 {
     // Least Common Multiple
     public class LCM

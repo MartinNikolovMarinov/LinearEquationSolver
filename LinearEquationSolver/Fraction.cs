@@ -1,8 +1,8 @@
-﻿namespace LinearEquationSolver
-{
-    using System;
-    using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
+namespace LinearEquationSolver
+{
     public struct Fraction : IComparable<Fraction>
     {
         public static readonly Fraction Zero = new Fraction(0, 0);
