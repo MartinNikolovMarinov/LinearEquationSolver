@@ -5,7 +5,11 @@ using System.Text.RegularExpressions;
 
 namespace LinearEquationSolver.Parsers
 {
-    public class BasicLinearEquation : ILinearEquationParser
+    /* 
+     * This parser is really bad and lazy, but it will do basic parsing.
+     * TODO: Implement proper tokenizer if necessary.
+     */
+    public class BasicLinearEquationParser : ILinearEquationParser
     {
         private static readonly Regex sWhitespace = new Regex(@"\s+");
         private static string ReplaceWhitespace(string input, string replacement)
@@ -120,23 +124,23 @@ namespace LinearEquationSolver.Parsers
         {
             if (input == "") return ("", "");
 
-            string variable, coefficent;
-            (variable, input) = CutLeading(input, x => char.IsDigit(x));
-            if (variable.Length != 0)
+            string coefficent, variable;
+            (coefficent, input) = CutLeading(input, x => char.IsDigit(x));
+            if (coefficent.Length != 0)
             {
-                (coefficent, input) = CutLeading(input, x => char.IsLetter(x));
+                (variable, input) = CutLeading(input, x => char.IsLetter(x));
                 if (input.Length != 0) // sanity check
                     throw new FormatException("Term format is invalid");
             }
             else
             {
-                (coefficent, input) = CutLeading(input, x => char.IsLetter(x));
-                (variable, input) = CutLeading(input, x => char.IsDigit(x));
+                (variable, input) = CutLeading(input, x => char.IsLetter(x));
+                (coefficent, input) = CutLeading(input, x => char.IsDigit(x));
                 if (input.Length != 0) // sanity check
                     throw new FormatException("Term format is invalid");
             }
 
-            return (variable, coefficent);
+            return (coefficent, variable);
         }
 
         public LinearEquation Parse(string rawInput)
@@ -155,7 +159,7 @@ namespace LinearEquationSolver.Parsers
                     // Is a fraction
                     string[] fractionSplit = rawTerm.Split('/');
                     if (fractionSplit.Length != 2)  // sanity check
-                        throw new FormatException($"Term format is invalid: {rawTerm}");
+                        throw new FormatException("Term format is invalid");
 
                     string variable;
                     string numberatorStr, numberatorVar;
@@ -172,13 +176,26 @@ namespace LinearEquationSolver.Parsers
                         _ = long.TryParse(denominatorStr, out denominator);
 
                     if (numberatorVar != "" && denominatorVar != "")
-                        throw new FormatException($"Term format is invalid: {rawTerm}");
-                    else if (numberatorVar != "")
-                        variable = numberatorVar;
+                    {
+                        throw new FormatException("Term format is invalid");
+                    }
+                    else if (denominatorVar != "" && denominatorStr == "" )
+                    {
+                        // equation is non-linear in this case !
+                        throw new FormatException("Term format is invalid");
+                    }
                     else if (denominatorVar != "")
+                    {
                         variable = denominatorVar;
+                    }
+                    else if (numberatorVar != "")
+                    {
+                        variable = numberatorVar;
+                    }
                     else
+                    {
                         variable = "";
+                    }
 
                     numberator = isPositive ? numberator : -numberator;
                     Fraction f = new Fraction(numberator, denominator);

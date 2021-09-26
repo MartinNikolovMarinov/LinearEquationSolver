@@ -22,7 +22,7 @@ namespace LinearEquationSolver
             get { return this.variable; }
             set
             {
-                if (String.IsNullOrWhiteSpace(value)) value = "";
+                if (string.IsNullOrWhiteSpace(value)) value = "";
                 this.variable = value;
             }
         }
@@ -32,6 +32,7 @@ namespace LinearEquationSolver
             this.Coefficient = coef;
             this.Variable = variable;
         }
+        public Term(Term other) : this(other.coefficient, other.variable) { }
 
         public int CompareTo(Term other)
         {
@@ -71,7 +72,7 @@ namespace LinearEquationSolver
 
         public override string ToString()
         {
-            if (String.IsNullOrWhiteSpace(this.Variable)) return this.Coefficient.ToString();
+            if (string.IsNullOrWhiteSpace(this.Variable)) return this.Coefficient.ToString();
             if (this.Coefficient == Fraction.One) return this.Variable.ToString();
             if (this.Coefficient == -Fraction.One) return $"-{this.Variable}";
             return $"{this.Coefficient} {this.Variable}";

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -14,28 +13,38 @@ namespace LinearEquationSolver
         public LinearEquation(params Term[] terms)
         {
             this.terms = new List<Term>(terms.Length);
-            foreach (var t in terms)
+            foreach (Term t in terms)
+            {
+                this.AddTerm(t);
+            }
+        }
+        public LinearEquation(LinearEquation other) 
+        {
+            this.terms = new List<Term>(other.terms.Count);
+            foreach (Term t in other.terms)
             {
                 this.AddTerm(t);
             }
         }
 
         public IEnumerable<Term> GetTerms() => this.terms;
+        public Term GetLeadingTerm() => this.terms.FirstOrDefault();
         public IEnumerable<long> GetNumberators() => this.terms.Select(x => x.Coefficient.Numberator);
         public IEnumerable<long> GetDenominators() => this.terms.Select(x => x.Coefficient.Denominator);
         public bool IsInvalid() => this.terms.Count == 1 && this.terms[0].IsConstant();
         public bool IsValid() => !this.IsInvalid();
 
-        public void AddTerm(Term t)
+        public void AddTerm(Term term)
         {
-            if (t.Coefficient == Fraction.Zero) return;
+            Term termCopy = new Term(term);
+            if (termCopy.Coefficient == Fraction.Zero) return;
 
-            int iOfTerm = this.terms.FindIndex((x) => x.Variable.Trim() == t.Variable.Trim());
+            int iOfTerm = this.terms.FindIndex((x) => x.Variable.Trim() == termCopy.Variable.Trim());
             if (iOfTerm >= 0)
             {
                 // If the term exists add the coefficients:
-                var exitingTerm = this.terms[iOfTerm];
-                exitingTerm.Coefficient += t.Coefficient;
+                Term exitingTerm = this.terms[iOfTerm];
+                exitingTerm.Coefficient += termCopy.Coefficient;
                 if (exitingTerm.Coefficient == (Fraction)0)
                 {
                     // Remove terms that evaluate to 0:
@@ -44,7 +53,7 @@ namespace LinearEquationSolver
             } 
             else
             {
-                this.terms.Add(t);
+                this.terms.Add(termCopy);
                 this.terms.Sort((a, b) => b.CompareTo(a));
             }
         }
@@ -53,7 +62,7 @@ namespace LinearEquationSolver
         {
             for (int i = 0; i < this.terms.Count; i++)
             {
-                var t = this.terms[i];
+                Term t = this.terms[i];
                 t.Coefficient *= x;
             }
         }
@@ -62,7 +71,7 @@ namespace LinearEquationSolver
         {
             for (int i = 0; i < this.terms.Count; i++)
             {
-                var t = this.terms[i];
+                Term t = this.terms[i];
                 t.Coefficient /= x;
             }
         }
@@ -82,18 +91,97 @@ namespace LinearEquationSolver
             if (denominatorGCD > 1) this.MultEachTermBy((Fraction)denominatorGCD);
         }
 
+        public bool Substitute(string variable, Fraction fraction)
+        {
+            int iOfTerm = this.terms.FindIndex((x) => x.Variable.Trim() == variable.Trim());
+            if (iOfTerm >= 0)
+            {
+                Term exitingTerm = this.terms[iOfTerm];
+                this.terms.RemoveAt(iOfTerm);
+                exitingTerm.Variable = "";
+                exitingTerm.Coefficient *= fraction;
+                this.AddTerm(exitingTerm);
+                this.Simplify();
+                return true;
+            }
+
+            return false;
+        }
+
+        public class Solution
+        {
+            public string Variable { get; set; }
+            public Fraction Value { get; set; }
+            public bool HasNoSolution { get; set; }
+
+            public Solution() { }
+            public Solution(string variable, Fraction value, bool hasNoSolution = false)
+            {
+                this.Variable = variable;
+                this.Value = value;
+                this.HasNoSolution = hasNoSolution;
+            }
+        }
+
+        public Solution GetSolution()
+        {
+            List<Term> terms = this.terms;
+            int count = terms.Count();
+            if (count == 0)
+            {
+                Solution ret = new Solution("0", (Fraction)0);
+                return ret;
+            }
+            else if (count == 1)
+            {
+                if (terms[0].IsConstant())
+                {
+                    // equation is not valid in this case. Example 0=5/2
+                    Solution ret = new Solution("0", terms[0].Coefficient, true);
+                    return ret;
+                }
+                else
+                {
+                    // in this case the variable is equal to 0. Example 1/2x=0
+                    Solution ret = new Solution(terms[0].Variable, (Fraction)0);
+                    return ret;
+                }
+            }
+            else if (count == 2)
+            {
+                if (terms[0].IsConstant())
+                    throw new Exception("Internal Implementation Error. This is a bug.");
+
+                if (terms[1].IsConstant())
+                {
+                    // Example for this case is: 
+                    // 1/2x + 2 = 0 
+                    // 1/2x = -2
+                    // x = (-2) / (1/2)
+                    Solution ret = new Solution(terms[0].Variable, (-terms[1].Coefficient) / terms[0].Coefficient);
+                    return ret;
+                }
+
+                // No constants -> parameterized solution.
+                return null;
+            }
+
+            // More than 2 terms means that the solution is parameterized.
+            return null;
+        }
+
+        public bool HasSolution() => this.GetSolution() != null;
+
         public override bool Equals(object obj)
         {
             if (obj is LinearEquation)
             {
-                var other = ((LinearEquation)obj);
-                if (this.terms.Count != other.terms.Count) 
-                    return false;
+                LinearEquation other = (LinearEquation)obj;
+                if (this.terms.Count != other.terms.Count) return false;
                 
                 for (int i = 0; i < this.terms.Count; i++)
                 {
-                    if (this.terms[i] != other.terms[i]) 
-                        return false;
+                    if (this.terms[i] != other.terms[i]) return false;
                 }
 
                 return true;
@@ -102,13 +190,46 @@ namespace LinearEquationSolver
             return false;
         }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
+        public override int GetHashCode() => base.GetHashCode();
 
         public static bool operator ==(LinearEquation a, LinearEquation b) => a.Equals(b);
         public static bool operator !=(LinearEquation a, LinearEquation b) => !a.Equals(b);
+
+        public int CompareTo(LinearEquation other)
+        {
+            if (this.terms.Count == 0 && other.terms.Count == 0) return 0;
+            else if (this.terms.Count == 0 && other.terms.Count != 0) return -1;
+            else if (this.terms.Count != 0 && other.terms.Count == 0) return 1;
+
+            List<Term>.Enumerator thisEnumerator = this.terms.GetEnumerator();
+            List<Term>.Enumerator otherEnumberator = other.terms.GetEnumerator();
+            int result = 0;
+            bool firstHasMore = thisEnumerator.MoveNext();
+            bool secondHasMore = otherEnumberator.MoveNext();
+            while (firstHasMore && secondHasMore)
+            {
+                result = thisEnumerator.Current.CompareTo(otherEnumberator.Current);
+                if (result != 0)
+                {
+                    result = result > 0 ? 1 : -1;
+                    break;
+                }
+
+                firstHasMore = thisEnumerator.MoveNext();
+                secondHasMore = otherEnumberator.MoveNext();
+            }
+
+            if (!firstHasMore && !secondHasMore) result = 0;
+            else if (!firstHasMore) result = 1;
+            else if (!secondHasMore) result = -1;
+
+            return result;
+        }
+
+        public static bool operator >(LinearEquation a, LinearEquation b) => a.CompareTo(b) > 0;
+        public static bool operator >=(LinearEquation a, LinearEquation b) => a.CompareTo(b) >= 0;
+        public static bool operator <(LinearEquation a, LinearEquation b) => a.CompareTo(b) < 0;
+        public static bool operator <=(LinearEquation a, LinearEquation b) => a.CompareTo(b) <= 0;
 
         public override string ToString()
         {
@@ -127,7 +248,6 @@ namespace LinearEquationSolver
             }
 
             bool reachedFirstOnLhs = false;
-            // sb.Append(this.terms[0].ToString());
             for (int i = 0; i < this.terms.Count; i++)
             {
                 Term t = this.terms[i];
@@ -160,44 +280,7 @@ namespace LinearEquationSolver
 
             // Move the constant to the right hand side:
             sb.Append($" = {-constant}");
-
             return sb.ToString();
         }
-
-        public int CompareTo(LinearEquation other)
-        {
-            if (this.terms.Count == 0 && other.terms.Count == 0) return 0;
-            else if (this.terms.Count == 0 && other.terms.Count != 0) return -1;
-            else if (this.terms.Count != 0 && other.terms.Count == 0) return 1;
-
-            var thisEnumerator = this.terms.GetEnumerator();
-            var otherEnumberator = other.terms.GetEnumerator();
-            int result = 0;
-            bool firstHasMore = thisEnumerator.MoveNext();
-            bool secondHasMore = otherEnumberator.MoveNext();
-            while (firstHasMore && secondHasMore)
-            {
-                result = thisEnumerator.Current.CompareTo(otherEnumberator.Current);
-                if (result != 0)
-                {
-                    result = result > 0 ? 1 : -1;
-                    break;
-                }
-
-                firstHasMore = thisEnumerator.MoveNext();
-                secondHasMore = otherEnumberator.MoveNext();
-            }
-
-            if (!firstHasMore && !secondHasMore) result = 0;
-            else if (!firstHasMore) result = 1;
-            else if (!secondHasMore) result = -1;
-
-            return result;
-        }
-
-        public static bool operator >(LinearEquation a, LinearEquation b) => a.CompareTo(b) > 0;
-        public static bool operator >=(LinearEquation a, LinearEquation b) => a.CompareTo(b) >= 0;
-        public static bool operator <(LinearEquation a, LinearEquation b) => a.CompareTo(b) < 0;
-        public static bool operator <=(LinearEquation a, LinearEquation b) => a.CompareTo(b) <= 0;
     }
 }

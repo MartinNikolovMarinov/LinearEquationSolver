@@ -14,7 +14,7 @@ namespace Tests
         {
             // Arrange:
             string input = $"-345/7x + y12 = -8y - 9/5";
-            ILinearEquationParser ep = new BasicLinearEquation();
+            ILinearEquationParser ep = new BasicLinearEquationParser();
             
             // Act:
             LinearEquation got =  ep.Parse(input);
@@ -33,7 +33,7 @@ namespace Tests
         public void SingleNumberInput()
         {
             // Arrange:
-            ILinearEquationParser ep = new BasicLinearEquation();
+            ILinearEquationParser ep = new BasicLinearEquationParser();
 
             // Act:
             LinearEquation got = ep.Parse("10");
@@ -50,7 +50,7 @@ namespace Tests
         public void SingleNegativeNumberInput()
         {
             // Arrange:
-            ILinearEquationParser ep = new BasicLinearEquation();
+            ILinearEquationParser ep = new BasicLinearEquationParser();
 
             // Act:
             LinearEquation got = ep.Parse("-5");
@@ -67,7 +67,7 @@ namespace Tests
         public void EmptyInput()
         {
             // Arrange:
-            ILinearEquationParser ep = new BasicLinearEquation();
+            ILinearEquationParser ep = new BasicLinearEquationParser();
             string[] testCases = new string[] { "",  "\t\t\t\t\t", "\t\n\t", "     ", " \n \n\n\n\t", " \n  \t ", " \n "};
             foreach (var t in testCases)
             {
@@ -85,7 +85,7 @@ namespace Tests
         public void OnlyOneValidTermNoEquals()
         {
             // Arrange:
-            ILinearEquationParser ep = new BasicLinearEquation();
+            ILinearEquationParser ep = new BasicLinearEquationParser();
 
             // Act:
             LinearEquation got = ep.Parse("-5/3x");
@@ -102,17 +102,12 @@ namespace Tests
         public void FractionsWithVariableDenominator()
         {
             // Arrange:
-            ILinearEquationParser ep = new BasicLinearEquation();
+            ILinearEquationParser ep = new BasicLinearEquationParser();
             var testCases = new[] {
                 new
                 {
-                    Input = "-9/x",
-                    Want = new LinearEquation(new Term(new Fraction(-9, 1), "x"))
-                },
-                new
-                {
-                    Input = "x/-2",
-                    Want = new LinearEquation(new Term(new Fraction(1, -2), "x"))
+                    Input = "x/-9",
+                    Want = new LinearEquation(new Term(new Fraction(1, -9), "x"))
                 },
                 new
                 {
@@ -121,11 +116,11 @@ namespace Tests
                 },
                 new
                 {
-                    Input = "-x/3 + y/-2 - -9/-1 + -80    / z = 0", // This input is "kinda" illigal ..
+                    Input = "-x/3 + y/-2 - -9/-1 + z = 0", // This input is "kinda" illigal ..
                     Want = new LinearEquation(
                                 new Term(new Fraction(-1, 3), "x"),
                                 new Term(new Fraction(1, -2), "y"),
-                                new Term(new Fraction(-80, 1), "z"),
+                                new Term(Fraction.One, "z"),
                                 new Term(-new Fraction(-9, -1), "")
                             )
                 },
@@ -146,7 +141,7 @@ namespace Tests
         public void ExceptionalCases()
         {
             // Arrange:
-            ILinearEquationParser ep = new BasicLinearEquation();
+            ILinearEquationParser ep = new BasicLinearEquationParser();
             var testCases = new[] {
                 new
                 {
@@ -171,12 +166,22 @@ namespace Tests
                 new
                 {
                     Input = "//3",
-                    Want = new FormatException("Term format is invalid: //3")
+                    Want = new FormatException("Term format is invalid")
                 },
                 new
                 {
                     Input = "4/8/x",
-                    Want = new FormatException("Term format is invalid: 4/8/x")
+                    Want = new FormatException("Term format is invalid")
+                },
+                new
+                {
+                    Input = "-2/x",
+                    Want = new FormatException("Term format is invalid")
+                },
+                new
+                {
+                    Input = "4/x",
+                    Want = new FormatException("Term format is invalid")
                 },
             };
 

@@ -3,6 +3,7 @@ using System.Diagnostics;
 
 namespace LinearEquationSolver
 {
+    // Fractions are immutable and all operations return new instances.
     public struct Fraction : IComparable<Fraction>
     {
         public static readonly Fraction Zero = new Fraction(0, 0);
@@ -57,7 +58,7 @@ namespace LinearEquationSolver
         {
             this.numberator = f.numberator;
             this.denominator = f.denominator;
-            // No need to simplify on copy.
+            // IMPORTANT: No need to simplify on copy.
         }
 
         public static explicit operator Fraction(sbyte x) => new Fraction(x, 1);
@@ -93,10 +94,7 @@ namespace LinearEquationSolver
         public static bool operator ==(Fraction a, Fraction b) => a.Equals(b);
         public static bool operator !=(Fraction a, Fraction b) => !a.Equals(b);
 
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(this.numberator, this.denominator);
-        }
+        public override int GetHashCode() => HashCode.Combine(this.numberator, this.denominator);
 
         public int CompareTo(Fraction other)
         {

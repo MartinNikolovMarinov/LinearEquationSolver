@@ -68,6 +68,15 @@
         }
 
         [TestMethod]
+        public void SpecialCasesWithEquals()
+        {
+            var l = new LinearEquation(new Term(-new Fraction(1, 2), "x"));
+            Assert.IsFalse(l.Equals(new Term(-new Fraction(1, 2), "x")));
+            Assert.IsFalse(l.Equals(10));
+            Assert.IsTrue(l.Equals(l));
+        }
+
+        [TestMethod]
         public void OnlyOneTerm()
         {
             var l = new LinearEquation(new Term(-new Fraction(1, 2), "я"));
@@ -86,7 +95,7 @@
         [TestMethod]
         public void ComparingLinearEquations()
         {
-            ILinearEquationParser ep = new BasicLinearEquation();
+            ILinearEquationParser ep = new BasicLinearEquationParser();
             var testCases = new[] {
                 new
                 {
