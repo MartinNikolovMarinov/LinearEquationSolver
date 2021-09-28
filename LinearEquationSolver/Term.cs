@@ -27,9 +27,9 @@ namespace LinearEquationSolver
             }
         }
 
-        public Term(Fraction coef, string variable)
+        public Term(Fraction coefficient, string variable)
         {
-            this.Coefficient = coef;
+            this.Coefficient = coefficient;
             this.Variable = variable;
         }
         public Term(Term other) : this(other.coefficient, other.variable) { }

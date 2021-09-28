@@ -1,8 +1,8 @@
+using LinearEquationSolver;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace Tests
 {
-    using LinearEquationSolver;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-
     [TestClass]
     public class CompareTests
     {

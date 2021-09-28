@@ -15,10 +15,10 @@ namespace Tests
             // Arrange:
             string input = $"-345/7x + y12 = -8y - 9/5";
             ILinearEquationParser ep = new BasicLinearEquationParser();
-            
+
             // Act:
             LinearEquation got =  ep.Parse(input);
-            
+
             // Verify:
             LinearEquation want = new LinearEquation();
             want.AddTerm(new Term(new Fraction(20, 1), "y"));
@@ -116,7 +116,7 @@ namespace Tests
                 },
                 new
                 {
-                    Input = "-x/3 + y/-2 - -9/-1 + z = 0", // This input is "kinda" illigal ..
+                    Input = "-x/3 + y/-2 - -9/-1 + z = 0", // This input is "kinda" illegal ..
                     Want = new LinearEquation(
                                 new Term(new Fraction(-1, 3), "x"),
                                 new Term(new Fraction(1, -2), "y"),

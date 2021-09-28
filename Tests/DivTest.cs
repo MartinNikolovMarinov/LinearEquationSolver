@@ -1,8 +1,8 @@
-﻿namespace Tests
-{
-    using LinearEquationSolver;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using LinearEquationSolver;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+namespace Tests
+{
     [TestClass]
     public class DivTest
     {

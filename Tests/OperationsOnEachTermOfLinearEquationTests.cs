@@ -1,9 +1,9 @@
-﻿namespace Tests
-{
-    using LinearEquationSolver;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using System.Linq;
+﻿using LinearEquationSolver;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
 
+namespace Tests
+{
     [TestClass]
     public class OperationsOnEachTermOfLinearEquationTests
     {

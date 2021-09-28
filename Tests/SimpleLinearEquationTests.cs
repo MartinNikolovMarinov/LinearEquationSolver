@@ -1,10 +1,10 @@
-﻿namespace Tests
-{
-    using LinearEquationSolver;
-    using LinearEquationSolver.Parsers;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using System.Linq;
+﻿using LinearEquationSolver;
+using LinearEquationSolver.Parsers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
 
+namespace Tests
+{
     [TestClass]
     public class SimpleLinearEquationTests
     {

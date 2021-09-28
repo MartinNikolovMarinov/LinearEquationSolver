@@ -1,10 +1,9 @@
-﻿
+﻿using System;
+using LinearEquationSolver;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace Tests
 {
-    using System;
-    using LinearEquationSolver;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-
     [TestClass]
     public class TestsWithZero
     {
@@ -15,7 +14,7 @@ namespace Tests
             Fraction f1 = new Fraction(1, 2);
             Fraction f2 = Fraction.Zero;
 
-            Assert.AreEqual(Fraction.Zero, (f1 / f2)); // this is a wierd case (1/2) / (0/0) = (1/2) * (0/0) = 0/0
+            Assert.AreEqual(Fraction.Zero, (f1 / f2)); // this is a weird case (1/2) / (0/0) = (1/2) * (0/0) = 0/0
             Assert.ThrowsException<InvalidOperationException>(() => new Fraction(12, 0));
         }
 
@@ -52,7 +51,7 @@ namespace Tests
         public void OperationsWithOneAndZero()
         {
             Assert.AreEqual(new Fraction(0, 0), Fraction.One * Fraction.Zero);
-            Assert.AreEqual(Fraction.Zero, Fraction.One / Fraction.Zero); // this is a wierd case (1/1) / (0/0) = (1/1) * (0/0) = 0/0
+            Assert.AreEqual(Fraction.Zero, Fraction.One / Fraction.Zero); // this is a weird case (1/1) / (0/0) = (1/1) * (0/0) = 0/0
             Assert.AreEqual(Fraction.One, Fraction.One + Fraction.Zero);
             Assert.AreEqual(new Fraction(1, 1), Fraction.One + Fraction.Zero);
             Assert.AreEqual((Fraction)1, Fraction.One + Fraction.Zero);

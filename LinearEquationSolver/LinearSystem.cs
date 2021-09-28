@@ -21,14 +21,14 @@ namespace LinearEquationSolver
 
         public enum SubstitutionResult
         {
-            NO_SUBSTITUTION_OCCURED,
-            SUBSTITUTION_OCCURED,
+            NO_SUBSTITUTION_OCCURRED,
+            SUBSTITUTION_OCCURRED,
             CONTRADICTION,
         }
 
         public SubstitutionResult SubstituteEquations()
         {
-            SubstitutionResult result = SubstitutionResult.NO_SUBSTITUTION_OCCURED;
+            SubstitutionResult result = SubstitutionResult.NO_SUBSTITUTION_OCCURRED;
             for (int i = 0; i < this.equations.Count; i++)
             {
                 LinearEquation curr = this.equations[i];
@@ -55,7 +55,7 @@ namespace LinearEquationSolver
                             bool madeSubst = next.Substitute(currSolution.Variable, currSolution.Value);
                             if (madeSubst)
                             {
-                                result = SubstitutionResult.SUBSTITUTION_OCCURED;
+                                result = SubstitutionResult.SUBSTITUTION_OCCURRED;
                             }
                         }
                     }
@@ -100,16 +100,16 @@ namespace LinearEquationSolver
                                 x = -x;
                             }
 
-                            LinearEquation steq = new LinearEquation(this.equations[i]);
-                            steq.DivEachTermBy(x);
-                            foreach (var stterm in steq.GetTerms())
+                            LinearEquation reductionEquation = new LinearEquation(this.equations[i]);
+                            reductionEquation.DivEachTermBy(x);
+                            foreach (Term t in reductionEquation.GetTerms())
                             {
-                                this.equations[j].AddTerm(stterm);
+                                this.equations[j].AddTerm(t);
                             }
                             this.equations[j].Simplify();
 
                             SubstitutionResult subResult = this.SubstituteEquations();
-                            while(subResult != SubstitutionResult.NO_SUBSTITUTION_OCCURED)
+                            while(subResult != SubstitutionResult.NO_SUBSTITUTION_OCCURRED)
                             {
                                 subResult = this.SubstituteEquations();
                             }

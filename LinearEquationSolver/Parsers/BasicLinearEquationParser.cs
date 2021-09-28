@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace LinearEquationSolver.Parsers
 {
-    /* 
+    /*
      * This parser is really bad and lazy, but it will do basic parsing.
      * TODO: Implement proper tokenizer if necessary.
      */
@@ -68,9 +68,9 @@ namespace LinearEquationSolver.Parsers
                 {
                     if (i - 1 > 0 && side[i - 1] == '/')
                     {
-                        /* 
-                         * In the special case where the sign is in the denominator of a fraciton only chenge the sign of the term.
-                         * Even though this case might be considered illigal it's still handled here.
+                        /*
+                         * In the special case where the sign is in the denominator of a fraction only change the sign of the term.
+                         * Even though this case might be considered illegal it's still handled here.
                         */
                         isPositive = symbol == '+' ? true : false;
                         continue;
@@ -120,13 +120,13 @@ namespace LinearEquationSolver.Parsers
             return (leading, rest);
         }
 
-        private static (string coefficent, string variable) SplitVarAndCoef(string input)
+        private static (string coefficient, string variable) SplitVarAndCoef(string input)
         {
             if (input == "") return ("", "");
 
-            string coefficent, variable;
-            (coefficent, input) = CutLeading(input, x => char.IsDigit(x));
-            if (coefficent.Length != 0)
+            string coefficient, variable;
+            (coefficient, input) = CutLeading(input, x => char.IsDigit(x));
+            if (coefficient.Length != 0)
             {
                 (variable, input) = CutLeading(input, x => char.IsLetter(x));
                 if (input.Length != 0) // sanity check
@@ -135,12 +135,12 @@ namespace LinearEquationSolver.Parsers
             else
             {
                 (variable, input) = CutLeading(input, x => char.IsLetter(x));
-                (coefficent, input) = CutLeading(input, x => char.IsDigit(x));
+                (coefficient, input) = CutLeading(input, x => char.IsDigit(x));
                 if (input.Length != 0) // sanity check
                     throw new FormatException("Term format is invalid");
             }
 
-            return (coefficent, variable);
+            return (coefficient, variable);
         }
 
         public LinearEquation Parse(string rawInput)
@@ -167,7 +167,7 @@ namespace LinearEquationSolver.Parsers
 
                     (numberatorStr, numberatorVar) = SplitVarAndCoef(fractionSplit[0]);
                     (denominatorStr, denominatorVar) = SplitVarAndCoef(fractionSplit[1]);
-                    
+
                     long numberator = 1;
                     long denominator = 1;
                     if (numberatorStr != "")

@@ -1,9 +1,9 @@
-﻿namespace Tests
-{
-    using LinearEquationSolver;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using System;
+﻿using LinearEquationSolver;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
+namespace Tests
+{
     [TestClass]
     public class TermTests
     {
