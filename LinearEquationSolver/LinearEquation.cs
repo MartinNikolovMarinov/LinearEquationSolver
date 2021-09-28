@@ -99,6 +99,7 @@ namespace LinearEquationSolver
                 Term exitingTerm = this.terms[iOfTerm];
                 this.terms.RemoveAt(iOfTerm);
                 exitingTerm.Variable = "";
+                //exitingTerm.Coefficient = exitingTerm.Coefficient.Abs();
                 exitingTerm.Coefficient *= fraction;
                 this.AddTerm(exitingTerm);
                 this.Simplify();

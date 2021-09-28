@@ -39,7 +39,7 @@ namespace Tests
                         { "x", new Fraction(2) },
                         { "y", new Fraction(3) },
                     },
-                }
+                },
             };
 
             foreach (var t in testCases)

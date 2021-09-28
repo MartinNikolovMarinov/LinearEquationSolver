@@ -24,9 +24,9 @@ namespace Tests
                     },
                     WantSubs = 1,
                     Want = new Dictionary<string, Fraction>{
-                        { "x", new Fraction(1, 1) },
-                        { "y", new Fraction(9, 1) },
-                        { "z", new Fraction(20, 1) },
+                        { "x", new Fraction(1) },
+                        { "y", new Fraction(9) },
+                        { "z", new Fraction(20) },
                     },
                 },
                 new
@@ -43,12 +43,12 @@ namespace Tests
                     },
                     WantSubs = 3,
                     Want = new Dictionary<string, Fraction>{
-                        { "a", new Fraction(5, 1) },
-                        { "b", new Fraction(8, 1) },
-                        { "d", new Fraction(90, 1) },
-                        { "x", new Fraction(7, 1) },
-                        { "y", new Fraction(6, 1) },
-                        { "z", new Fraction(2, 1) },
+                        { "a", new Fraction(5) },
+                        { "b", new Fraction(8) },
+                        { "d", new Fraction(90) },
+                        { "x", new Fraction(7) },
+                        { "y", new Fraction(6) },
+                        { "z", new Fraction(2) },
                     },
                 },
                 new
@@ -61,9 +61,25 @@ namespace Tests
                     },
                     WantSubs = 0,
                     Want = new Dictionary<string, Fraction>{
-                        { "a", new Fraction(1, 1) },
-                        { "b", new Fraction(2, 1) },
-                        { "c", new Fraction(10, 1) },
+                        { "a", new Fraction(1) },
+                        { "b", new Fraction(2) },
+                        { "c", new Fraction(10) },
+                    },
+                },
+                new
+                {
+                    Input = new string[]
+                    {
+                        "- c + b + a = 0",
+                        "a - 1/2 = 0",
+                        "c = 3/2",
+                        "b = 1",
+                    },
+                    WantSubs = 1,
+                    Want = new Dictionary<string, Fraction>{
+                        { "a", new Fraction(1, 2) },
+                        { "b", new Fraction(1) },
+                        { "c", new Fraction(3, 2) },
                     },
                 },
             };
