@@ -54,6 +54,7 @@ namespace LinearEquationSolver
             this.denominator = denominator;
             this.Simplify();
         }
+        public Fraction(long numberator) : this(numberator, 1) { }
         public Fraction(Fraction f)
         {
             this.numberator = f.numberator;

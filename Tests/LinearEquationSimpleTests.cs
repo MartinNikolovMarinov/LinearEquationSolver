@@ -6,7 +6,7 @@ using System.Linq;
 namespace Tests
 {
     [TestClass]
-    public class SimpleLinearEquationTests
+    public class LinearEquationSimpleTests
     {
         [TestMethod]
         public void GeneralCaseInit()
@@ -48,7 +48,7 @@ namespace Tests
             CollectionAssert.AreEqual(new Term[] { }, l.GetTerms().ToArray());
             Assert.AreEqual("", l.ToString());
 
-            // Validate that fraction simplification works with removeing zero terms:
+            // Validate that fraction simplification works with removing zero terms:
             for (int i = 1; i < 10; i++)
             {
                 l.AddTerm(new Term(-new Fraction(1, 2), "x"));

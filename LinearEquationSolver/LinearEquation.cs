@@ -112,19 +112,20 @@ namespace LinearEquationSolver
         {
             public string Variable { get; set; }
             public Fraction Value { get; set; }
-            public bool HasNoSolution { get; set; }
 
             public Solution() { }
             public Solution(string variable, Fraction value, bool hasNoSolution = false)
             {
                 this.Variable = variable;
                 this.Value = value;
-                this.HasNoSolution = hasNoSolution;
             }
         }
 
         public Solution GetSolution()
         {
+            if (this.IsInvalid()) 
+                return null;
+
             List<Term> terms = this.terms;
             int count = terms.Count();
             if (count == 0)
@@ -134,17 +135,16 @@ namespace LinearEquationSolver
             }
             else if (count == 1)
             {
-                if (terms[0].IsConstant())
+                if (!terms[0].IsConstant())
                 {
-                    // equation is not valid in this case. Example 0=5/2
-                    Solution ret = new Solution("0", terms[0].Coefficient, true);
+                    // In this case the variable is equal to 0. Example 1/2x=0
+                    Solution ret = new Solution(terms[0].Variable, (Fraction)0);
                     return ret;
                 }
                 else
                 {
-                    // in this case the variable is equal to 0. Example 1/2x=0
-                    Solution ret = new Solution(terms[0].Variable, (Fraction)0);
-                    return ret;
+                    // Equation is not valid in this case. Example 0=5/2
+                    throw new Exception("Internal Implementation Error. This case should have been handled previously. This is a bug.");
                 }
             }
             else if (count == 2)

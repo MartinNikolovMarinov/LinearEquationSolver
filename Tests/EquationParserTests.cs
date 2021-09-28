@@ -30,6 +30,26 @@ namespace Tests
         }
 
         [TestMethod]
+        public void NegativeRightHandSideCase()
+        {
+            // Arrange:
+            string input = $"x - y = 0";
+            ILinearEquationParser ep = new BasicLinearEquationParser();
+
+            // Act:
+            LinearEquation got = ep.Parse(input);
+
+            // Verify:
+            LinearEquation want = new LinearEquation();
+            want.AddTerm(new Term(-Fraction.One, "y"));
+            want.AddTerm(new Term(Fraction.One, "x"));
+
+            Assert.IsTrue(want == got);
+            Assert.AreEqual(want.GetTerms().Count(), got.GetTerms().Count());
+            Assert.AreEqual(want.ToString(), got.ToString());
+        }
+
+        [TestMethod]
         public void SingleNumberInput()
         {
             // Arrange:

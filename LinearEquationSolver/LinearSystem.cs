@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LinearEquationSolver
 {
@@ -32,6 +33,13 @@ namespace LinearEquationSolver
             for (int i = 0; i < this.equations.Count; i++)
             {
                 LinearEquation curr = this.equations[i];
+                if (curr.IsInvalid())
+                {
+                    // Contradiction found
+                    result = SubstitutionResult.CONTRADICTION;
+                    goto DONE;
+                }
+
                 LinearEquation.Solution currSolution = curr.GetSolution();
                 if (currSolution != null)
                 {

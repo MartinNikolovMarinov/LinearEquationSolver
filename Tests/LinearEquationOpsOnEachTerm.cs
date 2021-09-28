@@ -5,7 +5,7 @@ using System.Linq;
 namespace Tests
 {
     [TestClass]
-    public class OperationsOnEachTermOfLinearEquationTests
+    public class LinearEquationOpsOnEachTerm
     {
         [TestMethod]
         public void TermEquality()
