@@ -91,15 +91,15 @@ namespace Tests
                 long wantSubs = t.WantSubs;
 
                 // Assert that the exact wanted number of substitutions happened and NO more.
-                LinearSystem.SubstitutionResult subResult;
+                LinearSystem.SubstitutionResult subsResult;
                 while (wantSubs > 0)
                 {
-                    subResult = ls.SubstituteEquations();
-                    Assert.IsTrue(subResult == LinearSystem.SubstitutionResult.SUBSTITUTION_OCCURRED);
+                    subsResult = ls.SubstituteEquations();
+                    Assert.IsTrue(subsResult == LinearSystem.SubstitutionResult.SUBSTITUTION_OCCURRED);
                     wantSubs--;
                 }
-                subResult = ls.SubstituteEquations();
-                Assert.IsTrue(subResult == LinearSystem.SubstitutionResult.NO_SUBSTITUTION_OCCURRED);
+                subsResult = ls.SubstituteEquations();
+                Assert.IsTrue(subsResult == LinearSystem.SubstitutionResult.NO_SUBSTITUTION_OCCURRED);
 
                 // Check resulting system:
                 Assert.IsTrue(ls.Equations.TrueForAll(x => x.HasSolution()));

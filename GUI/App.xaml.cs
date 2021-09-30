@@ -12,7 +12,6 @@ namespace GUI
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
-
             MainWindow wnd = new MainWindow();
             wnd.Show();
         }

@@ -108,13 +108,13 @@ namespace LinearEquationSolver
                                 x = -x;
                             }
 
-                            LinearEquation reductionEquation = new LinearEquation(this.equations[i]);
+                            LinearEquation reductionEquation = new LinearEquation(curr);
                             reductionEquation.DivEachTermBy(x);
                             foreach (Term t in reductionEquation.GetTerms())
                             {
-                                this.equations[j].AddTerm(t);
+                                next.AddTerm(t);
                             }
-                            this.equations[j].Simplify();
+                            next.Simplify();
 
                             SubstitutionResult subResult = this.SubstituteEquations();
                             while(subResult != SubstitutionResult.NO_SUBSTITUTION_OCCURRED)
