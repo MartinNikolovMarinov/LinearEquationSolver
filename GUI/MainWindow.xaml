@@ -3,13 +3,34 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:GUI" xmlns:local1="clr-namespace:System;assembly=System.Runtime"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <StackPanel>
-        <WrapPanel Margin="10" HorizontalAlignment="Center">
-            <Button Name="btnLoadFromFile" Margin="0,0,20,0" Click="BtnLoadFromFile_Click">Load from File...</Button>
-        </WrapPanel>
-        <Image Name="imgDynamic" Margin="10"  />
-    </StackPanel>
+        Title="MainWindow" Height="800" Width="1200" >
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="100" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="2" Content="Input Equation To Solve" HorizontalAlignment="Center"/>
+        <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="8" Margin="5,5,5,5" BorderThickness="2"  Name="textBoxEquation" TextWrapping="Wrap" AcceptsReturn="True" />
+        <StackPanel Grid.Row="2" Grid.Column="3" Grid.ColumnSpan="2" Margin="0,0,0,5" Orientation="Vertical">
+            <Button Name="btnSolve" Click="BtnSolve_Click" HorizontalAlignment="Center" Height="25" Width="100">Solve Equation</Button>
+        </StackPanel>
+        <ScrollViewer Grid.Row="3" Grid.ColumnSpan="8">
+            <Image Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="8" x:Name="imgDynamic"/>
+        </ScrollViewer>
+    </Grid>
 </Window>
