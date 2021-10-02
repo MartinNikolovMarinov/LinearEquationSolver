@@ -46,7 +46,7 @@ namespace Tests
             {
                 LinearEquation[] eqs = t.Input.Select(x => lep.Parse(x)).ToArray();
                 LinearSystem ls = new LinearSystem(eqs);
-                ls.Solve();
+                ls.DirectSolve();
 
                 // Check resulting system:
                 Assert.IsTrue(ls.Equations.TrueForAll(x => x.HasSolution()));

@@ -6,6 +6,7 @@ using System.IO;
 using LinearEquationSolver.Parsers;
 using LinearEquationSolver;
 using System.Text;
+using System.Linq;
 
 namespace GUI
 {
@@ -29,54 +30,12 @@ namespace GUI
             string userInput = textBoxEquation.Text;
             if (userInput == null) return;
 
-            //string userInput = @"
-            //    \begin{array}{rcc}
-            //            2x - 2y & = & 0 \\
-            //            z + 3w  & = & 2 \\
-            //            3x + 3y & = & 0 \\ 
-            //            x - y + 2z + 6w & = & 4
-            //    \end{array}
+            // Sanitize user input
+            userInput = userInput.Replace("−", "-");
 
-            //    \quad \quad \quad \quad
-            //    \frac{1}{2}p_{2} + p_{3}
-            //    \longrightarrow
-            //    \quad
-
-            //    \begin{array}{rcc}
-            //            2x - 2y & = & 0 \\
-            //            z + 3w  & = & 2 \\
-            //            3x + 3y & = & 0 \\ 
-            //            x - y + 2z + 6w & = & 4
-            //    \end{array}
-
-            //    \quad \quad \quad \quad
-            //    \frac{1}{2}p_{2} + p_{3}
-            //    \longrightarrow
-            //    \quad
-
-            //    \begin{array}{rcc}
-            //            2x - 2y & = & 0 \\
-            //            z + 3w  & = & 2 \\
-            //            3x + 3y & = & 0 \\ 
-            //            x - y + 2z + 6w & = & 4
-            //    \end{array}
-
-            //    \quad \quad \quad \quad
-            //    \frac{1}{2}p_{2} + p_{3}
-            //    \longrightarrow
-            //    \quad
-
-            //    \begin{array}{rcc}
-            //            2x - 2y & = & 0 \\
-            //            z + 3w  & = & 2 \\
-            //            3x + 3y & = & 0 \\ 
-            //            x - y + 2z + 6w & = & 4
-            //    \end{array}
-            //";
-
-            var painter = new MathPainter();
+            // Make equation out of user input:
             ILinearEquationParser lep = new BasicLinearEquationParser();
-            string[] userSplit = userInput.Split(Environment.NewLine);
+            string[] userSplit = userInput.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
             LinearSystem ls = new LinearSystem();
             foreach (string rawEq in userSplit)
             {
@@ -84,21 +43,56 @@ namespace GUI
                 ls.AddEquation(eq);
             }
 
-            ls.Solve();
-
-            StringBuilder sb = new StringBuilder();
-            foreach (LinearEquation eq in ls.Equations)
+            // Parse system solution to latex output:
+            StringBuilder latexBuf = new StringBuilder();
+            LinearSystem.SubstitutionResult subResult;
+            LatexDisplayMgr.LinearSystemToLatex(latexBuf, ls);
+            while (true)
             {
-                sb.Append(eq.ToString());
-                sb.Append(@"\\");
+                subResult = ls.SubstituteEquations();
+                while (subResult == LinearSystem.SubstitutionResult.SUBSTITUTION_OCCURRED)
+                {
+                    subResult = ls.SubstituteEquations();
+                }
+                if (subResult == LinearSystem.SubstitutionResult.CONTRADICTION)
+                {
+                    break;
+                }
+
+                LinearSystem.ReductionResult res = ls.ReduceEquation();
+                if (res == null)
+                {
+                    break;
+                }
+
+                string reducedByStr = res.ToString().Replace("*", @"\cdot");
+                latexBuf.Append(reducedByStr);
+                latexBuf.AppendLine(@"\longrightarrow \quad");
+                LatexDisplayMgr.LinearSystemToLatex(latexBuf, ls, res.SrcReduceRow, res.DestReduceRow);
             }
 
-            painter.LaTeX = sb.ToString();
-            Stream pngStream = painter.DrawAsStream();
+            if (subResult != LinearSystem.SubstitutionResult.CONTRADICTION)
+            {
+                bool wroteSolution = LatexDisplayMgr.SolutionToLatex(latexBuf, ls);
+                if (!wroteSolution)
+                {
+                    // TODO: Represent this case as a parameterized solution.
+                }
+            }
+            else
+            {
+                latexBuf.Append(@"\color{red}{Contradiction Found !}");
+            }
+
+            // Create latex bitmap out of it:
+            string latex = latexBuf.ToString();
+            var painter = new MathPainter();
+            painter.LaTeX = latex;
+            Stream bitmapStream = painter.DrawAsStream();
             
             var bitmap = new BitmapImage();
             bitmap.BeginInit();
-            bitmap.StreamSource = pngStream;
+            bitmap.StreamSource = bitmapStream;
             bitmap.CacheOption = BitmapCacheOption.OnLoad;
             bitmap.EndInit();
             bitmap.Freeze();

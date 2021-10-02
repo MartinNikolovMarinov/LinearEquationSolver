@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 
 namespace LinearEquationSolver
 {
@@ -74,70 +72,86 @@ namespace LinearEquationSolver
             return result;
         }
 
-        // TODO: Split solution into self documenting steps and tidy up the mess !
-        public void Solve()
+        public class ReductionResult
         {
-            bool done = false;
-            while(!done)
+            // Which row did it use for the reduction:
+            public int SrcReduceRow;
+            // In which row did the reduction occur:
+            public int DestReduceRow;
+            // What was the row reduced by:
+            public Fraction ReductionCoefficient;
+
+            public override string ToString()
             {
-                done = true;
-                for (int i = 0; i < this.equations.Count; i++)
+                return $"{this.ReductionCoefficient} * p_{{{this.SrcReduceRow}}} + p_{{{this.DestReduceRow}}}";
+            }
+        }
+
+        // ReduceEquation uses Gausses method to reduce the system in exactly one row.
+        public ReductionResult ReduceEquation()
+        {
+            ReductionResult result = new ReductionResult
+            {
+                SrcReduceRow = -1,
+                DestReduceRow = -1,
+                ReductionCoefficient = (Fraction)0,
+            };
+
+            for (int i = 0; i < this.equations.Count; i++)
+            {
+                LinearEquation curr = this.equations[i];
+                Term currLeadingTerm = curr.GetLeadingTerm();
+                if (curr.HasSolution()) continue;
+
+                for (int j = i + 1; j < this.equations.Count; j++)
                 {
-                    LinearEquation curr = this.equations[i];
-                    Term currLeadingTerm = curr.GetLeadingTerm();
-                    if (curr.HasSolution())
-                    {
-                        continue;
-                    }
+                    LinearEquation next = this.equations[j];
+                    Term nextLeadingTerm = next.GetLeadingTerm();
+                    if (next.HasSolution()) continue;
 
-                    for (int j = i + 1; j < this.equations.Count; j++)
+                    if (currLeadingTerm.Variable == nextLeadingTerm.Variable)
                     {
-                        LinearEquation next = this.equations[j];
-                        Term nextLeadingTerm = next.GetLeadingTerm();
-                        if (next.HasSolution())
+                        Fraction x = ((Fraction)(-1)) * (currLeadingTerm.Coefficient / nextLeadingTerm.Coefficient);
+                        result.SrcReduceRow = i;
+                        result.DestReduceRow = j;
+                        result.ReductionCoefficient = Fraction.One / x;
+                        LinearEquation reductionEquation = new LinearEquation(curr);
+                        reductionEquation.DivEachTermBy(x);
+                        foreach (Term t in reductionEquation.GetTerms())
                         {
-                            continue;
+                            next.AddTerm(t);
                         }
+                        next.Simplify();
 
-                        if (currLeadingTerm.Variable == nextLeadingTerm.Variable)
-                        {
-                            bool shouldBePositive = (currLeadingTerm.IsPositive() == nextLeadingTerm.IsPositive()) ? true : false;
-                            Fraction x = currLeadingTerm.Coefficient / nextLeadingTerm.Coefficient;
-                            if (!shouldBePositive)
-                            {
-                                x = -x;
-                            }
-
-                            LinearEquation reductionEquation = new LinearEquation(curr);
-                            reductionEquation.DivEachTermBy(x);
-                            foreach (Term t in reductionEquation.GetTerms())
-                            {
-                                next.AddTerm(t);
-                            }
-                            next.Simplify();
-
-                            SubstitutionResult subResult = this.SubstituteEquations();
-                            while(subResult != SubstitutionResult.NO_SUBSTITUTION_OCCURRED)
-                            {
-                                subResult = this.SubstituteEquations();
-                            }
-                            if (subResult == SubstitutionResult.CONTRADICTION)
-                            {
-                                // TODO: handle contradiction
-                                Environment.Exit(1);
-                            }
-
-                            done = false;
-                            break;
-                        }
-                    }
-
-                    if (!done)
-                    {
-                        break;
+                        goto DONE;
                     }
                 }
             }
+
+        DONE:
+            if (result.SrcReduceRow < 0) 
+                return null;
+            return result;
+        }
+
+        // Tries to solve the linear equation. Returns false if it contains a contradiction.
+        public bool DirectSolve()
+        {
+            ReductionResult reductionResult = null;
+            bool hasContradiction = false;
+            do
+            {
+                reductionResult = this.ReduceEquation();
+                SubstitutionResult subResult = this.SubstituteEquations();
+                while (subResult == SubstitutionResult.SUBSTITUTION_OCCURRED)
+                {
+                    subResult = this.SubstituteEquations();
+                }
+                hasContradiction = (subResult == SubstitutionResult.CONTRADICTION);
+            }
+            while (reductionResult != null && !hasContradiction);
+
+            return hasContradiction;
         }
     }
 }
