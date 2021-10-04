@@ -6,7 +6,6 @@ using System.IO;
 using LinearEquationSolver.Parsers;
 using LinearEquationSolver;
 using System.Text;
-using System.Linq;
 
 namespace GUI
 {
@@ -15,8 +14,20 @@ namespace GUI
     /// </summary>
     public partial class MainWindow : Window
     {
+        const string USER_INPUT_ERR = "Failed to convert user input into a system. \n" +
+            "Please provide valid input. For Example: \n" +
+            "x + y − z = 10 \n" +
+            "2x − 2y + z = 0 \n" +
+            "x + z = 5 \n" +
+            "4y + z = 20";
+
+        const string SYSTEM_SOLUTION_FAILED = "Failed to calculate solution. It's likely that a bug occurred.";
+
+        private StringBuilder latexBuf;
+
         public MainWindow()
         {
+            this.latexBuf = new StringBuilder();
             InitializeComponent();
         }
 
@@ -30,21 +41,75 @@ namespace GUI
             string userInput = textBoxEquation.Text;
             if (userInput == null) return;
 
-            // Sanitize user input
-            userInput = userInput.Replace("−", "-");
+            LinearSystem ls;
+            try
+            {
+                // Parse user input:
+                ls = UserInputToLinearSystem(userInput);
+            }
+            catch (Exception ex)
+            {
+                MessageBoxResult result = MessageBox.Show(USER_INPUT_ERR, "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Console.WriteLine(ex.Message);
+                return;
+            }
 
+            lock (latexBuf) // Pointless in non multi-threaded code, but leave as a reminder.
+            {
+                latexBuf.Clear();
+                try
+                {
+                    // Parse system solution to latex output:
+                    SystemSolutionToLatex(ls, latexBuf);
+                }
+                catch (Exception ex)
+                {
+                    MessageBoxResult result = MessageBox.Show(SYSTEM_SOLUTION_FAILED, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Console.WriteLine(ex.Message);
+                    return;
+                }
+
+                // Create latex bitmap and set the image control:
+                BitmapImage bitmap = LatexToBitmap(latexBuf);
+                imgDynamic.Source = bitmap;
+                imgDynamic.Width = bitmap.Width;
+                imgDynamic.Height = bitmap.Height;
+            }
+        }
+
+        private static BitmapImage LatexToBitmap(StringBuilder latexBuf)
+        {
+            string latex = latexBuf.ToString();
+            MathPainter painter = new MathPainter();
+            painter.LaTeX = latex;
+            Stream bitmapStream = painter.DrawAsStream();
+
+            BitmapImage bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.StreamSource = bitmapStream;
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.EndInit();
+            bitmap.Freeze();
+            return bitmap;
+        }
+
+        private static LinearSystem UserInputToLinearSystem(string userInput)
+        {
             // Make equation out of user input:
             ILinearEquationParser lep = new BasicLinearEquationParser();
-            string[] userSplit = userInput.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+            string[] split = userInput.Replace("−", "-").Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
             LinearSystem ls = new LinearSystem();
-            foreach (string rawEq in userSplit)
+            foreach (string rawEq in split)
             {
                 LinearEquation eq = lep.Parse(rawEq);
                 ls.AddEquation(eq);
             }
 
-            // Parse system solution to latex output:
-            StringBuilder latexBuf = new StringBuilder();
+            return ls;
+        }
+
+        private static void SystemSolutionToLatex(LinearSystem ls, StringBuilder latexBuf)
+        {
             LinearSystem.SubstitutionResult subResult;
             LatexDisplayMgr.LinearSystemToLatex(latexBuf, ls);
             while (true)
@@ -83,23 +148,6 @@ namespace GUI
             {
                 latexBuf.Append(@"\color{red}{Contradiction Found !}");
             }
-
-            // Create latex bitmap out of it:
-            string latex = latexBuf.ToString();
-            var painter = new MathPainter();
-            painter.LaTeX = latex;
-            Stream bitmapStream = painter.DrawAsStream();
-            
-            var bitmap = new BitmapImage();
-            bitmap.BeginInit();
-            bitmap.StreamSource = bitmapStream;
-            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.EndInit();
-            bitmap.Freeze();
-
-            imgDynamic.Source = bitmap;
-            imgDynamic.Width = bitmap.Width;
-            imgDynamic.Height = bitmap.Height;
         }
     }
 }
