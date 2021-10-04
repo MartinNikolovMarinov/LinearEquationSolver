@@ -55,7 +55,7 @@ namespace LinearEquationSolver
         {
             if (obj is Term)
             {
-                var termObj = ((Term)obj);
+                Term termObj = ((Term)obj);
                 return this.Variable == termObj.Variable && this.Coefficient == termObj.Coefficient;
             }
 

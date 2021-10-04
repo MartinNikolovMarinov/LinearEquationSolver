@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LinearEquationSolver\LinearEquationSolver.csproj" />
+    <ProjectReference Include="..\src\src.csproj" />
   </ItemGroup>
 
 </Project>

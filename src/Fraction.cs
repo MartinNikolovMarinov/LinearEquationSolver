@@ -17,7 +17,7 @@ namespace LinearEquationSolver
 
             long numberator = lhs.numberator * rhs.denominator + rhs.numberator * lhs.denominator;
             long denominator = lhs.denominator * rhs.denominator;
-            var ret = new Fraction(numberator, denominator);
+            Fraction ret = new Fraction(numberator, denominator);
             return ret;
         }
 
@@ -30,7 +30,7 @@ namespace LinearEquationSolver
         {
             long numberator = lhs.numberator * rhs.numberator;
             long denominator = lhs.denominator * rhs.denominator;
-            var ret = new Fraction(numberator, denominator);
+            Fraction ret = new Fraction(numberator, denominator);
             return ret;
         }
 
@@ -38,7 +38,7 @@ namespace LinearEquationSolver
         {
             long numberator = lhs.numberator * rhs.denominator;
             long denominator = lhs.denominator * rhs.numberator;
-            var ret = new Fraction(numberator, denominator);
+            Fraction ret = new Fraction(numberator, denominator);
             return ret;
         }
 
@@ -86,7 +86,7 @@ namespace LinearEquationSolver
         {
             if (obj is Fraction)
             {
-                var objFrac = (Fraction)(obj);
+                Fraction objFrac = (Fraction)(obj);
                 return (this.denominator == objFrac.denominator && this.numberator == objFrac.numberator);
             }
             return false;
