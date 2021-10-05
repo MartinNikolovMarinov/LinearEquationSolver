@@ -42,6 +42,12 @@ namespace LinearEquationSolver
             return ret;
         }
 
+        public static Fraction Abs(Fraction other)
+        {
+            Fraction ret = new Fraction(Math.Abs(other.numberator), Math.Abs(other.denominator));
+            return ret;
+        }
+
         private long numberator;
         private long denominator;
 
@@ -81,6 +87,7 @@ namespace LinearEquationSolver
         public static Fraction operator *(Fraction a, Fraction b) => a.Mult(b);
         public Fraction Div(Fraction other) => Fraction.Div(this, other);
         public static Fraction operator /(Fraction a, Fraction b) => a.Div(b);
+        public Fraction Abs() => Fraction.Abs(this);
 
         public override bool Equals(object obj)
         {

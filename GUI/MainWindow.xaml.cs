@@ -21,8 +21,6 @@ namespace GUI
             "x + z = 5 \n" +
             "4y + z = 20";
 
-        const string SYSTEM_SOLUTION_FAILED = "Failed to calculate solution. It's likely that a bug occurred.";
-
         private StringBuilder latexBuf;
 
         public MainWindow()
@@ -64,7 +62,7 @@ namespace GUI
                 }
                 catch (Exception ex)
                 {
-                    MessageBoxResult result = MessageBox.Show(SYSTEM_SOLUTION_FAILED, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBoxResult result = MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     Console.WriteLine(ex.Message);
                     return;
                 }

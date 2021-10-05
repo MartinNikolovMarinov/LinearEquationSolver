@@ -57,6 +57,7 @@ namespace Tests
             CollectionAssert.AreEqual(new Term[] { }, l.GetTerms().ToArray());
             Assert.AreEqual("", l.ToString());
 
+            l = new LinearEquation();
             // Only constant terms should not produce equations strings:
             var emptyStuff = new string[10] { null, "", " ", "   ", "\t", "\n", "\r\n", " \t", "\t \t", "\t\t\t\t\t\n\n\n\n\n\r\n\r\n\t   \n\t" };
             for (int i = 0; i < 10; i++)
@@ -64,7 +65,7 @@ namespace Tests
                 l.AddTerm(new Term(new Fraction(i, 1), emptyStuff[i]));
             }
             CollectionAssert.AreEqual(new Term[] { new Term((Fraction)45, "") }, l.GetTerms().ToArray());
-            Assert.AreEqual("45", l.ToString());
+            Assert.AreEqual("45 = 0", l.ToString());
         }
 
         [TestMethod]

@@ -244,8 +244,8 @@ namespace LinearEquationSolver
             }
             else if (this.IsInvalid())
             {
-                // Terms containing only a constant. Can't build an equation but let's print somthing:
-                return this.terms.First().Coefficient.Numberator.ToString();
+                // Terms containing only a constant. Can't build an equation but let's print something:
+                return this.terms.First().Coefficient.Abs().ToString() + " = 0";
             }
 
             bool reachedFirstOnLhs = false;
