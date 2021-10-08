@@ -9,6 +9,16 @@ namespace LinearEquationSolver
     public class LinearEquation : IComparable<LinearEquation>
     {
         private List<Term> terms;
+        private Comparison<Term> customComparison;
+
+        public Comparison<Term> CustomComparison {
+            get { return customComparison; }
+            set 
+            {
+                this.customComparison = value;
+                this.SortTerms();
+            } 
+        }
 
         public LinearEquation(params Term[] terms)
         {
@@ -34,9 +44,10 @@ namespace LinearEquationSolver
         public bool IsInvalid() => this.terms.Count == 1 && this.terms[0].IsConstant();
         public bool IsValid() => !this.IsInvalid();
 
-        public void AddTerm(Term term)
+        public void AddTerm(Term term, bool noCopy = false)
         {
-            Term termCopy = new Term(term);
+            Term termCopy = term;
+            if (!noCopy) termCopy = new Term(term);
             if (termCopy.Coefficient == Fraction.Zero) return;
 
             int iOfTerm = this.terms.FindIndex((x) => x.Variable.Trim() == termCopy.Variable.Trim());
@@ -54,8 +65,16 @@ namespace LinearEquationSolver
             else
             {
                 this.terms.Add(termCopy);
-                this.terms.Sort((a, b) => b.CompareTo(a));
+                this.SortTerms();
             }
+        }
+
+        private void SortTerms()
+        {
+            if (this.CustomComparison != null)
+                this.terms.Sort(this.CustomComparison);
+            else
+                this.terms.Sort(ComparisonFactory.CreateReverseComparison());
         }
 
         public void MultEachTermBy(Fraction x)
@@ -115,7 +134,7 @@ namespace LinearEquationSolver
             public Fraction Value { get; set; }
 
             public Solution() { }
-            public Solution(string variable, Fraction value, bool hasNoSolution = false)
+            public Solution(string variable, Fraction value)
             {
                 this.Variable = variable;
                 this.Value = value;
@@ -172,6 +191,30 @@ namespace LinearEquationSolver
         }
 
         public bool HasSolution() => this.GetSolution() != null;
+
+        public Term[] ExpressVariable(string variable)
+        {
+            int indexOfVar = this.terms.FindIndex(x => x.Variable == variable);
+            if (indexOfVar < 0) throw new ArgumentException($"Can't express equation in terms of {variable}. It doesn't exist as a variable in this equation.");
+
+            Term expressedTerm = this.terms[indexOfVar];
+            Term[] res = new Term[this.terms.Count - 1];
+            int arrIndex = 0;
+            for (int i = 0; i < this.terms.Count; i++)
+            {
+                if (i == indexOfVar) continue; // skip expressed variable
+
+                // Move all terms to the right hand side and divide by the coefficient in front of the expressed variable:
+                Term t = this.terms[i];
+                Term newTerm = new Term(-t.Coefficient, t.Variable);
+                newTerm.Coefficient /= expressedTerm.Coefficient;
+
+                res[arrIndex] = newTerm;
+                arrIndex++;
+            }
+
+            return res;
+        }
 
         public override bool Equals(object obj)
         {
@@ -240,7 +283,7 @@ namespace LinearEquationSolver
             if (this.terms.Count == 0)
             {
                 // No terms. Can't build an equation.
-                return "";
+                return "0 = 0";
             }
             else if (this.IsInvalid())
             {

@@ -6,6 +6,9 @@ using System.IO;
 using LinearEquationSolver.Parsers;
 using LinearEquationSolver;
 using System.Text;
+using System.Collections.Generic;
+using System.Linq;
+using System.Diagnostics;
 
 namespace GUI
 {
@@ -108,6 +111,11 @@ namespace GUI
 
         private static void SystemSolutionToLatex(LinearSystem ls, StringBuilder latexBuf)
         {
+            // FIXME: remove this:
+            ls.SetSystemWideComparison(ComparisonFactory.CreateVariableOrderComparison(new Dictionary<string, int>() {
+                { "x", 5 }, { "y", 4 }, { "z", 3 }, { "w", 2 },
+            }));
+
             LinearSystem.SubstitutionResult subResult;
             LatexDisplayMgr.LinearSystemToLatex(latexBuf, ls);
             while (true)
@@ -139,7 +147,95 @@ namespace GUI
                 bool wroteSolution = LatexDisplayMgr.SolutionToLatex(latexBuf, ls);
                 if (!wroteSolution)
                 {
-                    // TODO: Represent this case as a parameterized solution.
+                    latexBuf.Append(@"\begin{array}{c}");
+
+                    // Add free variables:
+                    Dictionary<string, Term[]> freeVarialesToTheirExpressions = new Dictionary<string, Term[]>();
+                    for (int i = 0; i < ls.Equations.Count; i++)
+                    {
+                        Term leadingTerm = ls.Equations[i].GetLeadingTerm();
+                        if (leadingTerm != null)
+                        {
+                            string leadingVar = leadingTerm.Variable;
+                            latexBuf.Append($"{leadingVar} = ");
+                            Term[] expressed = ls.Equations[i].ExpressVariable(leadingVar);
+
+                            if (expressed.Length > 0)
+                            {
+                                var term = expressed[0];
+                                string sign = term.IsPositive() ? "" : "-";
+                                latexBuf.Append($"{sign} {term.Coefficient.Abs()} {term.Variable}");
+                                for (int j = 1; j < expressed.Length; j++)
+                                {
+                                    term = expressed[j];
+                                    sign = term.IsPositive() ? "+" : "-";
+                                    latexBuf.Append($"{sign} {term.Coefficient.Abs()} {term.Variable}");
+                                }
+                            }
+                            else
+                            {
+                                latexBuf.Append($"0");
+                            }
+
+                            latexBuf.AppendLine(@"\\");
+                            freeVarialesToTheirExpressions.Add(leadingVar, expressed);
+                        }
+                    }
+
+                    // Add non-free
+                    List<string> notFreeVars = new List<string>();
+                    foreach (LinearEquation v in ls.Equations)
+                    {
+                        foreach (Term t in v.GetTerms().Skip(1))
+                        {
+                            if (!freeVarialesToTheirExpressions.ContainsKey(t.Variable) && !notFreeVars.Contains(t.Variable))
+                            {
+                                if (!string.IsNullOrWhiteSpace(t.Variable))
+                                {
+                                    latexBuf.Append($"{t.Variable} = {t.Variable}");
+                                    latexBuf.AppendLine(@"\\");
+                                }
+                                notFreeVars.Add(t.Variable);
+                            }
+                        }
+                    }
+
+                    latexBuf.Append(@"\end{array}");
+                    latexBuf.AppendLine(@"\\");
+
+                    IEnumerable<string> notFreeVarsNoConstant = notFreeVars.Where(x => !string.IsNullOrWhiteSpace(x));
+                    List<string> uniqueVars = new List<string>(freeVarialesToTheirExpressions.Count() + notFreeVars.Count());
+                    uniqueVars.AddRange(freeVarialesToTheirExpressions.Keys);
+                    uniqueVars.AddRange(notFreeVarsNoConstant);
+
+                    latexBuf.AppendLine(@"\{");
+
+                    for (int i = 0; i < notFreeVars.Count; i++)
+                    {
+                        string row = notFreeVars[i];
+                        latexBuf.Append(@"\left( \begin{array}{c}");
+                        // TODO: implement ??
+                        latexBuf.Append(@"\end{array} \right)");
+                        
+                        if (row != "") latexBuf.Append($" \\cdot {row}");
+                        if (i < notFreeVars.Count() - 1) latexBuf.Append($" + ");
+
+                        latexBuf.AppendLine();
+                    }
+
+                    //for (int j = 0; j < freeVarsExpressed.Count; j++)
+                    //{
+                    //    (string, Term[]) fvex = freeVarsExpressed[j];
+                    //    string variable = fvex.Item1;
+
+                    //    // TODO: implement this:
+                    //    latexBuf.Append(@"\left( \begin{array}{c} -4 \\ 0 \\ 0 \end{array} \right)");
+                    //    if (variable != "") latexBuf.Append($" \\cdot {variable}");
+                    //    if (j < freeVarsExpressed.Count - 1) latexBuf.Append($" + ");
+                    //}
+
+                    latexBuf.AppendLine($" \\ | \\ {string.Join(",", notFreeVarsNoConstant)} \\in \\mathbb{{R}}");
+                    latexBuf.AppendLine(@"\}");
                 }
             }
             else

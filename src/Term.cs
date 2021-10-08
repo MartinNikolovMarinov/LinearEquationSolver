@@ -34,20 +34,28 @@ namespace LinearEquationSolver
         }
         public Term(Term other) : this(other.coefficient, other.variable) { }
 
-        public int CompareTo(Term other)
+        public static int CompareTo(Term a, Term b)
         {
-            if (this.Variable != other.Variable)
-            {
-                return this.Variable.CompareTo(other.Variable);
-            }
+            if (a == null && b == null) 
+                return 0;
+            if (a != null && b == null)
+                return 1;
+            if (a == null && b != null)
+                return -1;
+
+            if (a.Variable != b.Variable) 
+                return a.Variable.CompareTo(b.Variable);
+            
             // If they have equal variables compare the coefficient:
-            return this.Coefficient.CompareTo(other.Coefficient);
+            return a.Coefficient.CompareTo(b.Coefficient);
         }
 
-        public static bool operator >(Term a, Term b) => a.CompareTo(b) > 0;
-        public static bool operator >=(Term a, Term b) => a.CompareTo(b) >= 0;
-        public static bool operator <(Term a, Term b) => a.CompareTo(b) < 0;
-        public static bool operator <=(Term a, Term b) => a.CompareTo(b) <= 0;
+        public int CompareTo(Term other) => Term.CompareTo(this, other);
+
+        public static bool operator >(Term a, Term b) => Term.CompareTo(a, b) > 0;
+        public static bool operator >=(Term a, Term b) => Term.CompareTo(a, b) >= 0;
+        public static bool operator <(Term a, Term b) => Term.CompareTo(a, b) < 0;
+        public static bool operator <=(Term a, Term b) => Term.CompareTo(a, b) <= 0;
 
         public bool IsPositive() => this.coefficient.IsPositive();
 
@@ -62,8 +70,17 @@ namespace LinearEquationSolver
             return false;
         }
 
-        public static bool operator ==(Term a, Term b) => a.Equals(b);
-        public static bool operator !=(Term a, Term b) => !a.Equals(b);
+        public static bool operator ==(Term a, Term b) {
+            if (a is null && b is null) return true;
+            else if (a is null || b is null) return false;
+            else return a.Equals(b);
+        }
+        public static bool operator !=(Term a, Term b)
+        {
+            if (a is null && b is null) return false;
+            else if (a is null || b is null) return true;
+            else return !a.Equals(b);
+        }
 
         public override int GetHashCode()
         {

@@ -46,7 +46,7 @@ namespace Tests
             var l = new LinearEquation();
 
             CollectionAssert.AreEqual(new Term[] { }, l.GetTerms().ToArray());
-            Assert.AreEqual("", l.ToString());
+            Assert.AreEqual("0 = 0", l.ToString());
 
             // Validate that fraction simplification works with removing zero terms:
             for (int i = 1; i < 10; i++)
@@ -55,7 +55,7 @@ namespace Tests
                 l.AddTerm(new Term(new Fraction(1*i, 2*i), "x"));
             }
             CollectionAssert.AreEqual(new Term[] { }, l.GetTerms().ToArray());
-            Assert.AreEqual("", l.ToString());
+            Assert.AreEqual("0 = 0", l.ToString());
 
             l = new LinearEquation();
             // Only constant terms should not produce equations strings:

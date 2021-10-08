@@ -1,5 +1,0 @@
-﻿This example causes a visual bug for some reason:
-
-x - y = z
-y + z = x 
-x + y = z

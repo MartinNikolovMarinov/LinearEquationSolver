@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace LinearEquationSolver
 {
@@ -10,12 +11,25 @@ namespace LinearEquationSolver
 
         public LinearSystem(params LinearEquation[] eqs)
         {
-            this.equations = new List<LinearEquation>(eqs);
+            this.AddEquations(eqs);
+        }
+
+        public void SetSystemWideComparison(Comparison<Term> comp)
+        {
+            foreach (LinearEquation eq in this.equations)
+            {
+                eq.CustomComparison = comp;
+            }
         }
 
         public void AddEquation(LinearEquation eq)
         {
             this.equations.Add(eq);
+        }
+
+        public void AddEquations(LinearEquation[] eqs)
+        {
+            this.equations = new List<LinearEquation>(eqs);
         }
 
         public enum SubstitutionResult
@@ -142,6 +156,7 @@ namespace LinearEquationSolver
             do
             {
                 reductionResult = this.ReduceEquation();
+                
                 SubstitutionResult subResult = this.SubstituteEquations();
                 while (subResult == SubstitutionResult.SUBSTITUTION_OCCURRED)
                 {

@@ -10,7 +10,7 @@ namespace Tests
     public class LinearSystemSolveTests
     {
         [TestMethod]
-        public void SolvingValidEquations()
+        public void SolveEquationsWithSingleSolution()
         {
             ILinearEquationParser lep = new BasicLinearEquationParser();
             var testCases = new[] {
@@ -62,6 +62,82 @@ namespace Tests
 
                     return res;
                 }));
+            }
+        }
+
+
+        [TestMethod]
+        public void SolvingValidEquationsWithParameterizedSolution()
+        {
+            ILinearEquationParser lep = new BasicLinearEquationParser();
+            var testCases = new[] {
+                new
+                {
+                    Input = new string[]
+                    {
+                        "x + y + z - w = 1",
+                        "y - z + w = -1",
+                        "3x + 6z - 6w = 6",
+                        "- y + z - w = 1",
+                    },
+                    Comparison = ComparisonFactory.CreateReverseComparison(),
+                    Want = new LinearEquation[]{
+                        lep.Parse("z + y + x - w = 1"),
+                        lep.Parse("2y + x = 0"),
+                        lep.Parse("0 = 0"),
+                        lep.Parse("0 = 0"),
+                    },
+                },
+                new
+                {
+                    Input = new string[]
+                    {
+                        "x + y + z - w = 1",
+                        "y - z + w = -1",
+                        "3x + 6z - 6w = 6",
+                        "- y + z - w = 1",
+                    },
+                    Comparison = ComparisonFactory.CreateVariableOrderComparison(new Dictionary<string, int>() {
+                        { "x", 5 },
+                        { "y", 4 },
+                        { "z", 3 },
+                        { "w", 2 },
+                    }),
+                    Want = new LinearEquation[]{
+                        lep.Parse("x + y + z - w = 1"),
+                        lep.Parse("y - z + w = -1"),
+                        lep.Parse("0 = 0"),
+                        lep.Parse("0 = 0"),
+                    },
+                },
+            };
+
+            foreach (var t in testCases)
+            {
+                LinearEquation[] eqs = t.Input.Select(x => lep.Parse(x)).ToArray();
+                LinearSystem ls = new LinearSystem(eqs);
+                ls.SetSystemWideComparison(t.Comparison);
+                foreach (var l in t.Want)
+                {
+                    l.CustomComparison = t.Comparison;
+                }
+
+                ls.DirectSolve();
+
+                // Assert:
+                Assert.IsFalse(ls.Equations.TrueForAll(x => x.HasSolution()));
+                Assert.AreEqual(t.Want.Count(), ls.Equations.Count(), "Equation count mismatch");
+
+                for (int i = 0; i < ls.Equations.Count(); i++)
+                {
+                    Term[] wantTerms = t.Want[i].GetTerms().ToArray();
+                    Term[] gotTerms = ls.Equations[i].GetTerms().ToArray();
+                    Assert.AreEqual(wantTerms.Length, gotTerms.Length, "Terms count mismatch");
+                    for (int j = 0; j < wantTerms.Length; j++)
+                    {
+                        Assert.AreEqual(wantTerms[j], gotTerms[j]);
+                    }
+                }
             }
         }
     }

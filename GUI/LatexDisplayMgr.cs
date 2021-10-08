@@ -1,6 +1,8 @@
 ﻿using LinearEquationSolver;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace GUI
@@ -21,8 +23,8 @@ namespace GUI
 #if DEBUG
                     Debug.Assert(solution != null); // sanity check.
 #endif
-                    if (solution.Variable == "0") continue; // skip 0 = 0 cases
-
+                    if (solution.Variable == "0") continue; // skip cases like 0 = 0
+                    
                     if (uniqueVars.Add(solution.Variable))
                     {
                         latexBuf.Append($"{solution.Variable} &=& {solution.Value}");
@@ -47,11 +49,6 @@ namespace GUI
                 foreach (LinearEquation eq in ls.Equations)
                 {
                     string eqStr = eq.ToString();
-                    if (eqStr == "")
-                    {
-                        i--;
-                        continue;
-                    }
 
                     if (i == destIndex) eqStr = $"\\color{{red}}{{{eqStr}}}";
                     if (i == srcIndex) eqStr = $"\\color{{blue}}{{{eqStr}}}";
