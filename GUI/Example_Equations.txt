@@ -114,6 +114,10 @@ Parameterized cases:
 	y - z = 0
 	x + 2z = 4
 
+	x + 2y - z = 3
+	2x + y + w = 4
+	x - y + z + w = 1
+
 
 
 	x + y = 0
@@ -122,10 +126,6 @@ Parameterized cases:
 	2x + z = 3
 	x - y - z = 1
 	3x - y = 4
-
-	x + 2y - z = 3
-	2x + y + w = 4
-	x - y + z + w = 1
 
 	x - y + z = 0
 	y + w = 0
