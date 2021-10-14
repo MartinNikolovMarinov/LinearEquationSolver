@@ -118,8 +118,6 @@ Parameterized cases:
 	2x + y + w = 4
 	x - y + z + w = 1
 
-
-
 	x + y = 0
 	z + x = 0
 
