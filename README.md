@@ -7,5 +7,5 @@ Demo GUI:
 ![Demo Gui Recording Gif](./docs/demo_gui_recording.gif "Demo GUI usage")
 
 
-**Disclaimer:** The project was create for educational purpose and none of it should be taken very seriously. Besides C#
+**Disclaimer:** The project was created for educational purpose and none of it should be taken very seriously. Besides C#
 is a terrible language for this type of project.
